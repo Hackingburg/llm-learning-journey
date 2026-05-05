@@ -26,7 +26,7 @@ class ChatRequest(BaseModel):
     """发给llm的请求体"""
     model: str = "DeepSeek-Chat" #默认值
     messages: list [Message]
-    temprature: float = Field(default=0.7, ge=0, le=2) # 限制范围 0-2
+    temperature: float = Field(default=0.7, ge=0, le=2) # 限制范围 0-2
 
 # ===== 实战演示 =====
 if __name__ == "__main__":
@@ -50,7 +50,7 @@ if __name__ == "__main__":
             Message(role="user", content="1+1=?")
 
         ],
-        temprature=0.5
+        temperature=0.5
     )
 
     print("\n✅ 请求体：")

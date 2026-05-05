@@ -31,9 +31,13 @@
 
 ```
 llm-learning-journey/
-├── day01_first_call.py    # Day 1: 第一次 API 调用
-├── .env.example           # 环境变量示例
+├── day01_first_call.py         # Day 1: 第一次 API 调用
+├── day02_pydantic_basics.py    # Day 2: Pydantic 基础
+├── day02_chat_with_memory.py   # Day 2: 带记忆的 ChatBot
+├── .env.example
 ├── .gitignore
+├── requirements.txt
+├── LEARNING_LOG.md
 └── README.md
 ```
 
