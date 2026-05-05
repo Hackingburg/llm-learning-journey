@@ -26,3 +26,25 @@
 ### 📌 明日计划
 - 学习 Pydantic：用结构化数据定义请求和响应
 - 实现多轮对话（带历史记录管理）
+
+## Day 2 -2026-05-05（周二）
+
+### 🎯 今日目标
+- 学习 Pydantic 数据模型
+- 实现带记忆的多轮对话 ChatBot
+
+### ✅ 完成情况
+- [x] Pydantic 基础：BaseModel、Field、Literal、自动校验
+- [x] 理解 LLM 的“无状态”本质
+- [x] 用类封装ChatBot， 维护 messages 历史
+- [x] 实现命令行交互（exit/reset/history）
+
+### 💡 关键收获 
+- **LLM 是无状态的**， “记忆”靠每次把完整历史塞进messages
+- Pydantic 的价值： 自动校验 + IDE 补全 + 数据契约
+- 'model_dump()' 把 Pydantic 对象转字典， 发 API 必备
+- 给 requests 加 ‘timeout’ 是工程化的基本素养
+
+### 📌 明日计划
+- 实现“流式输出” （打字机效果， 体验更好）
+- 给 ChatBot 加上 token 计数和成本统计
