@@ -9,6 +9,8 @@ import requests
 
 load_dotenv()
 API_KEY = os.getenv("DEEPSEEK_API_KEY")
+if not API_KEY:
+    raise ValueError("请在 .env 文件中设置 DEEPSEEK_API_KEY")
 
 # DeepSeek-Chat 价格（2026 年参考价， 请以官网为准）
 # 单位： 元/ 1M tokens
@@ -67,4 +69,4 @@ if __name__ == "__main__":
     chat_with_usage("1+1=?")
 
     # 测试 2: 长问题 
-    chat_with_usage("请用 500 字介绍一下大预言模型的发展历程和未来趋势。")
+    chat_with_usage("请用 500 字介绍一下大语言模型的发展历程和未来趋势。")

@@ -16,3 +16,6 @@ __pycache__/
 
 # MAC
 .DS_Store
+
+# 会话记录（包含隐私）
+sessions/

@@ -2,6 +2,18 @@
 
 > 一个 Python 入门者向大模型应用工程师转型的真实记录
 
+## ⭐ 主要作品
+
+### DeepChat - 命令行 AI 助手
+独立开发的产品级 ChatBot，整合 LLM 应用核心能力：
+- 💬 流式输出（打字机效果）
+- 🧠 多轮对话记忆
+- 📏 滑动窗口管理（防止上下文超限）
+- 💰 实时 Token 与成本追踪
+- 💾 会话持久化（JSON 存储）
+
+➡️ [查看代码](./day04_deepchat.py)
+
 ## 📖 关于这个仓库
 
 这里记录我从 0 开始学习大模型应用开发的全过程，包括代码、笔记、踩过的坑和做过的项目。
@@ -20,6 +32,8 @@
 |-----|------|------|------|
 | 01 | 2026-05-04 | 第一次调用 DeepSeek API | ✅ |
 | 02 | 2026-05-05 | Pydantic + 多轮对话 ChatBot | ✅ |
+| 03 | 2026-05-06 | 流式输出 + Token统计 | ✅ |
+| 04 | 2026-05-07 | DeepChat 产品级 ChatBot 🎁 | ✅ |
 
 ## 🛠️ 技术栈
 
@@ -34,8 +48,9 @@ llm-learning-journey/
 ├── day01_first_call.py         # Day 1: 第一次 API 调用
 ├── day02_pydantic_basics.py    # Day 2: Pydantic 基础
 ├── day02_chat_with_memory.py   # Day 2: 带记忆的 ChatBot
-├── day03_streaming.py.         # Day 3: 流式输出
-├── day03_token_count.py.       # Day 3: Token 成本计算
+├── day03_streaming.py          # Day 3: 流式输出
+├── day03_token_count.py        # Day 3: Token 成本计算
+├── day04_deepchat.py           # Day 4: 产品级 ChatBot ”Deepchat“
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt

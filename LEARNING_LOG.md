@@ -71,3 +71,28 @@
 - 把流式输出 + Token 统计 整合进 ChatBot 类
 - 实现“滑动窗口”历史管理（防止 token 超限和成本失控）
 
+## Day 4 - 2026-05-07（周四）
+
+### 🎯 今日目标
+- 整合 Day 1-3 所学，打造产品级ChatBot “DeepChat”
+- 实现滑动窗口，成本追踪，会话持久化
+
+### ✅ 完成情况
+- [x] 把流式输出、多轮记忆、Pydantic 全部整合
+- [x] 实现滑动窗口（防止历史无限增长）
+- [x] 实时追踪 token 与成本（流式也能拿 usage）
+- [x] 会话保存 / 加载 （JSON 持久化）
+- [x] 命令系统： /help /reset /history /stats /save /load /exit 
+
+### 关键收获
+- **配置集中化**：用config 类统一管理常量，远超魔法数学
+- **流式响应 + usage**：要加 `stream_options： {"include_usage": True}`
+- **滑动窗口**：保留最近 N 轮，平衡“记忆”与“成本”
+- **持久化思维**：用pathlib 操作文件比 os.path 优雅得多
+- **隐私意识**： 会话记录绝不能推 GitHub
+
+### 📌 第一阶段总结（Week 1）
+- 4 天完成从零调通 API → 产品级 ChatBot
+- 已具备开发任何 LLM 应用的基础能力
+- **下周计划**：Prompt 工程深入 + FastAPI 把 DeepChat 变成 Web 服务
+
