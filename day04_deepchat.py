@@ -1,6 +1,6 @@
 """
 Day 4: DeepChat - 产品级命令行 AI 助手
-整合所学内容： 流式输出 + 多轮记忆 + 滑动窗口 + 陈本追踪 + 会话持久化
+整合所学内容： 流式输出 + 多轮记忆 + 滑动窗口 + 成本追踪 + 会话持久化
 """
 import os 
 import json
@@ -15,7 +15,7 @@ load_dotenv()
 API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 if not API_KEY:
-    raise ValueError("❌ 没找到 DEEPSEEK——API——KEY")
+    raise ValueError("❌ 没找到 DEEPSEEK_API_KEY")
 
 # ===== 配置 =====
 class Config:
@@ -162,7 +162,7 @@ class DeepChat:
         print("🔄 会话已重置(成本统计保留)")
 
     def show_history(self):
-        print("\n📜 会话历史 (共 {len(self.history)} 条， {self.turn_count}轮):") 
+        print(f"\n📜 会话历史 (共 {len(self.history)} 条， {self.turn_count}轮):") 
         for i, msg in enumerate(self.history):
             preview = msg.content[:60].replace("\n", " ")
             print(f" [{i}] {msg.role}: {preview}...")
@@ -176,7 +176,7 @@ class DeepChat:
 
     # ----- 会话持久化 -----
     def save(self, name: str = None):
-        """"保留当前会话到 JSON 文件"""
+        """保留当前会话到 JSON 文件"""
         if not name:
             name = datetime.now().strftime("session_%Y%m%d_%H%M%S")
         filepath = Config.SESSIONS_DIR / f"{name}.json"
