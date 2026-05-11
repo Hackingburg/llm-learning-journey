@@ -34,6 +34,7 @@
 | 02 | 2026-05-05 | Pydantic + 多轮对话 ChatBot | ✅ |
 | 03 | 2026-05-06 | 流式输出 + Token统计 | ✅ |
 | 04 | 2026-05-07 | DeepChat 产品级 ChatBot 🎁 | ✅ |
+| 05 | 2026-05-11 | 学习 Prompt 工程四大基本法 | ✅ |
 
 ## 🛠️ 技术栈
 
@@ -51,6 +52,8 @@ llm-learning-journey/
 ├── day03_streaming.py          # Day 3: 流式输出
 ├── day03_token_count.py        # Day 3: Token 成本计算
 ├── day04_deepchat.py           # Day 4: 产品级 ChatBot ”Deepchat“
+├── day05_prompt_egineering.py  # Day 5: Prompt工程四大基本法
+├── day05_my_experiment.py      # Day 5: 角色扮演小实验
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
