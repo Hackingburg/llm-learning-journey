@@ -107,7 +107,7 @@
 - [x] Few-shot：理解给例子对输出格式的巨大影响
 - [x] CoT 思维链：见证"一步一步想"对推理题的提升
 - [x] 温度调控：感受 0.1 vs 1.5 的输出差异
-- [x] 自己设计实验：（写下你的实验主题和发现）
+- [x] 「健身教练 vs 营养师」对比同一减脂问题的回答视角差异
 
 ### 💡 关键收获
 - **Prompt 是 LLM 应用的灵魂**，同样的模型 prompt 不同效果天差地别
@@ -121,3 +121,26 @@
 ### 📌 明日计划
 - 学习"结构化输出"：让 AI 返回严格的 JSON
 - 用 Pydantic 校验 LLM 的输出（业务必备）
+
+## Day 6 - 2026-05-12（周二）
+
+### 🎯 今日目标
+- 解决 AI 输出”不结构化，不可靠“的工程难题
+- 掌握 Pydantic + JSON Mode 工业级方案
+
+### ✅ 完成情况
+- [x] 朴素方法：靠 prompt 让 AI 输出 JSON（不可靠）
+- [x] JSON Mode：用 `response_format` 强制合法 JSON
+- [x] 终极方案：Pydantic schema 入 prompt + 校验返回值
+- [x] 实战订票场景，体验"AI 接入业务系统"
+
+### 💡 关键收获
+- **裸奔输出 JSON 不可靠**， AI 经常加 markdown 包裹或解释
+- **JSON Mode** 解决“格式合法”但不解决“字段错误”
+- **Pydantic 校验** 是真正的业务护城河
+- **4 层防御**：Prompt → JSON Mode → Pydantic →  函数签名
+- 这就是 LangChain 等框架的底层原理
+
+### 📌 明日计划
+- 学习 FastAPI：把 Python 函数变成 Web 接口
+- 为“DeepChat 服务化”做准备
