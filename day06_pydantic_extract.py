@@ -77,6 +77,7 @@ def safe_extract_ticket(user_input: str) -> Optional[TicketRequest]:
     try:
         ticket = call_llm_with_schema(user_input, TicketRequest)
         print(f"✅ 校验通过！ 提取结果：")
+        print(ticket.model_dump_json(indent=2))
         return ticket
     
     except ValidationError as e:
