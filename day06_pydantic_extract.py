@@ -1,13 +1,12 @@
 """
 Day 6-3: Pydantic + JSON Mode = 工业级结构化输出
-目标：让 AI 输出严格符合呀污规范的 JSON，不符合就报错
+目标：让 AI 输出严格符合业务规范的 JSON，不符合就报错
 """
 import os
 import json
 import requests
 from dotenv import load_dotenv
 from pydantic import BaseModel, ValidationError, Field 
-from datetime import date, time 
 from typing import Literal, Optional
 
 load_dotenv()
@@ -31,7 +30,7 @@ def call_llm_with_schema(user_input: str, model_class: type[BaseModel]) -> BaseM
     # 1. 自动生成字段说明
     schema = model_class.model_json_schema()
 
-    prompt = f"""从用户的话里提取信息，严格按照一下 JSON Schema 输出：
+    prompt = f"""从用户的话里提取信息，严格按照以下 JSON Schema 输出：
 
 {json.dumps(schema, ensure_ascii=False, indent=2)}
 

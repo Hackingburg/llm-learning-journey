@@ -144,3 +144,29 @@
 ### 📌 明日计划
 - 学习 FastAPI：把 Python 函数变成 Web 接口
 - 为“DeepChat 服务化”做准备
+
+
+## Day 7 - 2026-05-13（周三）
+
+### 🎯 今日目标
+- 学习 FastAPI，把 Python 函数变成 Web 接口
+- 把 DeepChat 的能力包装成 Web API
+
+### ✅ 完成情况
+- [x] FastAPI Hello World：路径参数、查询参数、POST + Pydantic
+- [x] 体验 `/docs` 自动生成的交互式 API 文档
+- [x] AI 单轮对话 API（带成本返回）
+- [x] **DeepChat 服务化**：用 session_id 实现多轮记忆
+- [x] HTTPException 标准错误返回
+- [x] 4 个端点：POST /chat、GET /sessions、GET /sessions/{id}、DELETE /sessions/{id}
+
+### 💡 关键收获
+- **FastAPI = Pydantic + 装饰器**，会 Pydantic 就基本会 FastAPI
+- **`/docs` 是杀手级特性**，不用写文档自动生成
+- **HTTP 无状态**，靠 session_id 在服务端维护"记忆"
+- **uvicorn --reload** 开发模式自动重启
+- **HTTPException** 是标准错误返回方式，比直接 raise Exception 更专业
+
+### 📌 明日计划
+- 思考：内存字典存会话有什么问题？（重启丢失、不能多机器）
+- 学习把会话存到 Redis / 数据库
