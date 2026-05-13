@@ -103,7 +103,7 @@ def chat(request: ChatRequest):
 
     # 拼装 messages 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    messages += [{"role": msg.role, "content": msg.content} for msg in session["history"]]  
+    messages += [msg.model_dump() for msg in session["history"]]  
 
     try: 
         data = call_llm(messages)
@@ -122,7 +122,7 @@ def chat(request: ChatRequest):
             session_id=sid,
             reply=reply,
             turn_count=session["turn_count"],
-            total_cost=session["total_cost"] 
+            total_cost=round(session["total_cost"], 6)
         )
     except Exception as e:
         # 回滚刚加的用户消息

@@ -27,7 +27,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     """响应体：AI 回复什么"""
     reply: str
-    inpput_tokens: int
+    input_tokens: int
     output_tokens: int
     cost: float  
 
@@ -85,7 +85,7 @@ def chat(request: ChatRequest):
         
         return ChatResponse(
             reply=reply,
-            inpput_tokens=usage["prompt_tokens"],
+            input_tokens=usage["prompt_tokens"],
             output_tokens=usage["completion_tokens"],
             cost=round(cost, 6)
         )
