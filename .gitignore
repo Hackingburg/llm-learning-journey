@@ -19,3 +19,7 @@ __pycache__/
 
 # 会话记录（包含隐私）
 sessions/
+
+# 数据库文件
+data/
+*.db
