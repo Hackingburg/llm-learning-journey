@@ -1,0 +1,14 @@
+# 不要把这些塞进镜像
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+.DS_Store
+data/
+sessions/
+*.db
+README.md
+LEARNING_LOG.md

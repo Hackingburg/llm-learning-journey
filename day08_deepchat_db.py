@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Literal 
 from fastapi import FastAPI, HTTPException, Depends 
 from pydantic import BaseModel, Field
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, select 
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, select, func 
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from dotenv import load_dotenv
 
@@ -114,7 +114,7 @@ def call_llm(messages: list[dict]) -> dict:
 # ===== API 端点 ===== 
 @app.get("/")
 def root(db: Session = Depends(get_db)):
-    count = db.execute(select(ChatSession)).scalars().all()
+    count = db.execute(select(func.count(ChatSession.id))).scalar()
     return {"service": "DeepChat DB", "total_sessions": len(count)}
 
 @app.post("/chat", response_model=ChatResponse)
@@ -201,7 +201,7 @@ def delete_session(session_id: str, db: Session = Depends(get_db)):
 @app.get("/sessions")
 def list_sessions(db: Session = Depends(get_db)):
     """列出所有活跃会话"""
-    sessions = db.execute(select(ChatSession)).order_by(ChatSession.updated_at.desc()).scalars().all()
+    sessions = db.execute( select(ChatSession).order_by(ChatSession.updated_at.desc())).scalars().all()
     
     return {
         "count": len(sessions),

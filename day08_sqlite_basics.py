@@ -42,7 +42,7 @@ try:
     conn.commit() # 🔑 必须 commit 才会真正写入
     print("✅ 已插入数据：Alice 和 Bob")
 except sqlite3.IntegrityError as e:
-    print(f"⚠️ 数据库已存在：{e}")
+    print(f"⚠️ 数据已存在：{e}")
 
 
 # ===== 4. 查询数据（SELECT） =====

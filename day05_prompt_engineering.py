@@ -147,7 +147,7 @@ def experiment_3_cot():
     print("\n🔍 观察：版本 A 可能直接给出错误答案（第 15 天），而版本 B 通过思维链正确推理出答案（第 29 天）。")
 
 # ========== 实验 4: 温度调控 ==========
-def expriment_4_temperature():
+def experiment_4_temperature():
     """
     对比： 同一个创意任务，不同温度的输出多样性
     场景： 起一个产品名字
@@ -173,8 +173,8 @@ if __name__ == "__main__":
 
     experiment_1_role()
     experiment_2_few_shot()
-    expriment_3_cot()
-    expriment_4_temperature()
+    experiment_3_cot()
+    experiment_4_temperature()
 
     print("\n" + "=" * 60)
     print("✅ 全部实验完成！")
