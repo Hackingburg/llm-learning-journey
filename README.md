@@ -2,6 +2,12 @@
 
 > 一个 Python 入门者向大模型应用工程师转型的真实记录
 
+## 🌐 在线 Demo
+
+**DeepChat API 已部署上线**：https://deepchat-nh50.onrender.com/docs
+
+直接在浏览器里就可以体验 AI 对话、查看 OpenAPI 文档。
+
 ## ⭐ 主要作品
 
 ### DeepChat - 命令行 AI 助手
@@ -10,9 +16,11 @@
 - 🧠 多轮对话记忆
 - 📏 滑动窗口管理（防止上下文超限）
 - 💰 实时 Token 与成本追踪
-- 💾 会话持久化（JSON 存储）
+- 💾 SQLite 持久化（重启不丢数据）
+- 🌐 FastAPI Web 服务 + Docker 容器化
+- ☁️ 已部署到 Render 云端
 
-➡️ [查看代码](./day04_deepchat.py)
+➡️ [核心代码](./day08_deepchat_db.py)
 
 ## 📖 关于这个仓库
 
@@ -35,6 +43,11 @@
 | 03 | 2026-05-06 | 流式输出 + Token统计 | ✅ |
 | 04 | 2026-05-07 | DeepChat 产品级 ChatBot 🎁 | ✅ |
 | 05 | 2026-05-11 | 学习 Prompt 工程四大基本法 | ✅ |
+| 06 | 2026-05-12 | 让 AI 输出严格符合业务规范的 JSON | ✅ |
+| 07 | 2026-05-13 | 用 FastAPI 把 Deepchat Web 服务化 | ✅ |
+| 08 | 2026-05-14 | Deepchat 持久化 | ✅ |
+| 09 | 2026-05-18 | 将 Deepchat 上线到 Render | ✅ |
+
 
 ## 🛠️ 技术栈
 
@@ -52,8 +65,19 @@ llm-learning-journey/
 ├── day03_streaming.py          # Day 3: 流式输出
 ├── day03_token_count.py        # Day 3: Token 成本计算
 ├── day04_deepchat.py           # Day 4: 产品级 ChatBot ”Deepchat“
-├── day05_prompt_egineering.py  # Day 5: Prompt工程四大基本法
+├── day05_prompt_egineering.py  # Day 5: Prompt 工程四大基本法
 ├── day05_my_experiment.py      # Day 5: 角色扮演小实验
+├── day06_json_basic.py         # Day 6: 靠 prompt 让 AI 输出 JSON 格式的文本
+├── day06_json_mode.py          # Day 6: 强制让 AI 只输出 JSON 格式
+├── day06_pydantic_extract.py   # Day 6: 工业级结构化输出
+├── day07_ai_api.py             # Day 7: 把 AI 能力变成 Web API
+├── day07_deepchat_api.py       # Day 7: DeepChat Web 服务化
+├── day07_fastapi_hello.py      # Day 7: FastAPI 入门
+├── day08_deepchat_db.py        # Day 8: DeepChat 持久化版
+├── day08_sqlalchemy_basics.py  # Day 8: SQLAlchemy 入门
+├── day08_sqlite_basics.py      # Day 8: sqlite 入门
+├── Dockerfile                  # Day 9: 镜像
+├── .dockerignore               # Day 9: 镜像忽略文件
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt

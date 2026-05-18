@@ -115,7 +115,7 @@ def call_llm(messages: list[dict]) -> dict:
 @app.get("/")
 def root(db: Session = Depends(get_db)):
     count = db.execute(select(func.count(ChatSession.id))).scalar()
-    return {"service": "DeepChat DB", "total_sessions": len(count)}
+    return {"service": "DeepChat DB", "total_sessions": count}
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest, db: Session = Depends(get_db)):
