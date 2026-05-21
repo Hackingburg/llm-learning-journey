@@ -281,3 +281,32 @@
 ### 📌 明日计划
 - 把 RAG 接入 DeepChat 服务
 - 实现"上传文档 + 即时问答" Web 接口
+
+## Day 12 - 2026-05-22（周四）
+
+### 🎯 今日目标
+- 把 RAG 接入 DeepChat Web 服务
+- 实现"上传文档 + 智能问答"完整闭环
+
+### ✅ 完成情况
+- [x] 设计 4 个新 API：上传/列表/删除/对话
+- [x] FastAPI 文件上传：UploadFile + multipart/form-data
+- [x] use_rag 开关 + kb_filter 元数据过滤
+- [x] retrieved_sources 字段：让回答可追溯
+- [x] 完整测试：上传 → 问答 → 删除 全流程
+- [x] **DeepChat 进化为 RAG 知识库问答系统** 🎯
+
+### 💡 关键收获
+- **接口设计先于代码** —— use_rag 开关是产品思维
+- **upsert 保证幂等** —— 同名文档可以反复上传更新
+- **retrieved_sources** 是 RAG 系统的"可信度证据"
+- **kb_filter** 让企业级权限隔离成为可能
+- **会话 + 向量库 是两个独立的数据库**，各司其职
+
+### 🤔 思考题
+- 现在只支持 .txt/.md，怎么支持 PDF/Word？
+- 知识库越来越大，怎么做"按用户隔离"（每个用户只能搜自己的文档）？
+
+### 📌 下一阶段
+- Day 13: Function Calling / Tool Use 入门
+- Week 4: Agent 系统 —— 让 AI 主动调用工具

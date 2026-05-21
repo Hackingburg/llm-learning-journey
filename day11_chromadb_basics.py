@@ -55,8 +55,8 @@ results = collection.query(
 print("Top 3 最相似的文档：")
 for doc, dist, meta in zip(
     results["documents"][0],
-    results["documents"][0],
-    results["documents"][0],
+    results["distances"][0],
+    results["metadatas"][0],
 ):
     print(f"  距离={dist:.3f} | 类别={meta['category']} | 内容：{doc}")
 
