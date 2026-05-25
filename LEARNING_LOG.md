@@ -310,3 +310,31 @@
 ### 📌 下一阶段
 - Day 13: Function Calling / Tool Use 入门
 - Week 4: Agent 系统 —— 让 AI 主动调用工具
+
+
+## Day 13 - 2026-05-25（周日 / 周一）
+
+### 🎯 今日目标
+- 理解 Function Calling 协议
+- 让 AI 主动使用多个工具
+
+### ✅ 完成情况
+- [x] 单工具：get_current_time
+- [x] 多工具：天气 + 时间 + 计算器
+- [x] 工具循环：AI 自主决定调用次数
+- [x] 边界场景：跨语言、数据缺失、推理 + 工具
+
+### 💡 关键收获
+- **Function Calling 协议 4 字段**：tools / tool_calls / tool_call_id / role:"tool"
+- **LLM 不真执行函数**，只输出"想调谁、传什么"，执行是我们的代码
+- **tool_choice: auto**：让 AI 自己判断要不要用工具
+- **多轮循环**是 Agent 的核心模式，需要 max_iterations 防死循环
+- **工具描述 description 很关键**，写得清楚 AI 才会选对
+
+### 🤔 思考题
+- 如果工具执行很慢（如查数据库 10 秒），怎么避免 LLM 干等？
+- 如何让 AI 调用敏感工具（如删数据库）时需要"用户确认"？
+
+### 📌 明日计划
+- 接入真实工具：网页搜索 + 调用 DeepChat 知识库
+- 把 Function Calling 接入 Web 服务
