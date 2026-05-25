@@ -168,7 +168,10 @@ async def upload_document(file: UploadFile = File(...)):
     if not file.filename.endswith((".txt", ".md")):
         raise HTTPException(status_code=400, detail="只支持 .txt 和 .md 文件")
     
-    content = (await file.read()).decode("utf-8")
+    try:
+       content = (await file.read()).decode("utf-8")
+    finally:
+        await file.close()
     chunks = chunk_text(content)
     
     if not chunks:

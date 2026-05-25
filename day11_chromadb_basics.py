@@ -10,7 +10,7 @@ DB_PATH = Path("data/chroma_db")
 DB_PATH.parent.mkdir(exist_ok=True)
 
 client = chromadb.PersistentClient(path=str(DB_PATH))
-print(f"✅ Chrome DB 已就绪， 数据目录：{DB_PATH}")
+print(f"✅ ChromaDB 已就绪， 数据目录：{DB_PATH}")
 
 
 # ===== 2. 创建/获取一个"集合"（类似 SQL 的表）=====
