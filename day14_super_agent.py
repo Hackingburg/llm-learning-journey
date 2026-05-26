@@ -166,7 +166,10 @@ def super_agent(question: str, max_steps: int = 6):
             args = json.loads(tc["function"]["arguments"])
             print(f"   🔧 {fn}({args})")
             
-            result = available_tools[fn](**args) if fn in available_tools else f"未知 {fn}"
+            try:
+                result = available_tools[fn](**args)
+            except Exception as e:
+                result = f"工具 {fn} 执行失败: {e}"
             print(f"   📊 {str(result)[:100]}")
             
             messages.append({

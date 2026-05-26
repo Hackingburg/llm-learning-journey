@@ -1,6 +1,6 @@
 """
 Day 14-1: ReAct 模式入门
-🎯 让 AI 显示输出"思考过程",而不只是答案
+🎯 让 AI 显式输出"思考过程",而不只是答案
 """
 import os 
 import re
@@ -12,7 +12,7 @@ API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 
 # ===== 工具集（沿用 Day 13）=====
-def get_weather(city: str) -> dict:
+def get_weather(city: str) -> str:
     fake_db = {
         "北京": "晴，5°C",
         "上海": "多云，10°C",
@@ -43,7 +43,7 @@ REACT_PROMPT = """你是一个会思考的 AI 助手，按以下格式回答：
 
 Thought: 我需要思考什么
 Action: 工具名[参数]
-Observation: 工具返回的结果（这一行有系统填，你不要谢）
+Observation: 工具返回的结果（这一行由系统填，你不要写）
 ... 可以重复 Thought/Action/Observation 多次...
 Thought: 我已经有足够信息了
 Final Answer: 最终给用户的答案
@@ -80,7 +80,7 @@ def call_llm(messages: list[dict], stop: list[str] = None) -> str:
 
 def parse_action(text: str) -> tuple[str, str] | None:
     """从文本里解析出 Action: tool_name[args]"""
-    match = re.search(r"Action:\s*(\w+)\[(.+?)\]", text)
+    match = re.search(r"Action:\s*(\w+)\[(.*?)\]", text)
     if match:
         return match.group(1), match.group(2)
     return None 
