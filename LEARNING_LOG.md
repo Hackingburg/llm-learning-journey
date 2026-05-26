@@ -338,3 +338,31 @@
 ### 📌 明日计划
 - 接入真实工具：网页搜索 + 调用 DeepChat 知识库
 - 把 Function Calling 接入 Web 服务
+
+
+## Day 14 - 2026-05-26（周二）
+
+### 🎯 今日目标
+- 理解 ReAct 模式（推理 + 行动）
+- 实现 SuperAgent：RAG + 工具自主组合
+
+### ✅ 完成情况
+- [x] 手撸 ReAct：看到 AI 的思考过程
+- [x] 工业版 ReAct：Function Calling + 显式思考
+- [x] **SuperAgent**：把 RAG 包装成工具，AI 自主调度
+- [x] 体验"AI 自主拆解任务"的爽感
+
+### 💡 关键收获
+- **ReAct = Reasoning + Acting**，让决策可观察
+- **RAG 可以"降级"为工具** —— Agent 自己决定何时查
+- **System Prompt 是 Agent 的"灵魂"** —— 写得好坏决定上限
+- **stop 词**让 LLM 在指定位置停下，避免脑补
+- **temperature 调低** = 思考更稳定，少抽风
+
+### 🤔 思考题
+- AI 的思考过程可见 = 用户看到的内容更长 = 体验变慢，怎么办？
+- 如果 Agent 卡死在一个工具反复调用（死循环），怎么自我恢复？
+
+### 📌 明日计划
+- 把 SuperAgent 接入 DeepChat Web 服务
+- 加流式输出，让用户实时看到 AI 思考
