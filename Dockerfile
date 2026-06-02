@@ -19,4 +19,4 @@ EXPOSE 8000
 
 # 7. 启动命令
 #    --host 0.0.0.0 让容器外能访问（127.0.0.1 只允许容器内访问）
-CMD ["uvicorn", "day08_deepchat_db:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "day16_deepchat_pro:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -6,6 +6,7 @@ import os
 import json
 import requests
 import chromadb
+import anyio 
 from datetime import datetime
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse, HTMLResponse
@@ -201,12 +202,18 @@ class AgentRequest(BaseModel):
 
 
 @app.post("/agent/stream")
-def agent_stream(req: AgentRequest):
-    """⭐ 流式 Agent API"""
-    return StreamingResponse(
-        stream_agent(req.message),
-        media_type="text/event-stream"
-    )
+async def agent_stream(req: AgentRequest):
+    """异步包装：避免阻塞 event loop"""
+    async def async_gen():
+        # 把同步生成器搬到线程池里跑
+        gen = stream_agent(req.message)
+        while True:
+            event = await anyio.to_thread.run_sync(next, gen, None)
+            if event is None:
+                break
+            yield event
+    
+    return StreamingResponse(async_gen(), media_type="text/event-stream")
 
 
 # ===== 自带前端 UI =====

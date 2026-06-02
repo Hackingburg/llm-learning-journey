@@ -1,5 +1,5 @@
 """
-Day 8-1: SQLAlchemy 入门 - 用 Python 类代替 SQL
+Day 8-2: SQLAlchemy 入门 - 用 Python 类代替 SQL
 目标：理解 ORM （Object-Relational Mapping）
 """
 from datetime import datetime 
