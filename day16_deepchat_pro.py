@@ -12,7 +12,7 @@ from pathlib import Path
 from datetime import datetime
 from sqlalchemy import create_engine, Column, String, DateTime, Text, select
 from sqlalchemy.orm import declarative_base, sessionmaker
-from fastapi import FastAPI, HTTPException 
+from fastapi import FastAPI, HTTPException, UploadFile, File 
 from fastapi.responses import StreamingResponse, HTMLResponse
 from pydantic import BaseModel
 from chromadb.api.types import EmbeddingFunction, Documents, Embeddings
@@ -385,6 +385,26 @@ def delete_session(session_id: str):
         db.close()
 
 
+@app.post("/kb/upload")
+async def upload_kb(file: UploadFile = File(...)):
+    if not file.filename.endswith((".txt", ".md")):
+        raise HTTPException(400, "只支持 .txt 和 .md")
+    try:
+        content = (await file.read()).decode("utf-8")
+    finally:
+        await file.close()
+    
+    chunks = [p.strip() for p in content.split("\n\n") if p.strip()]
+    if not chunks:
+        raise HTTPException(400, "文件为空")
+    
+    source = file.filename.replace(".txt", "").replace(".md", "")
+    ids = [f"{source}#{i}" for i in range(len(chunks))]
+    metadatas = [{"source": source, "chunk_index": i} for i in range(len(chunks))]
+    kb.upsert(documents=chunks, ids=ids, metadatas=metadatas)
+    return {"source": source, "chunks_added": len(chunks), "total": kb.count()}
+
+
 # ===== 美化前端 =====
 @app.get("/", response_class=HTMLResponse)
 def index():
@@ -444,6 +464,12 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; height: 100vh; dis
 
 <div class="main">
     <div class="header">DeepChat Pro 🧠 — 你的私人 AI Agent</div>
+    <div style="padding: 10px 20px; background: #fffbe6; border-bottom: 1px solid #eee;">
+        📚 上传知识库文档（.txt/.md）：
+        <input type="file" id="kbFile" accept=".txt,.md" />
+        <button onclick="uploadKB()">上传</button>
+        <span id="kbStatus" style="margin-left: 10px; color: #888;"></span>
+    </div>  
     <div class="messages" id="messages"></div>
     <div class="input-area">
         <div class="input-wrap">
@@ -480,6 +506,17 @@ async function loadSession(id) {
         addMsg(m.role, m.content);
     });
     loadSessions();
+}
+
+async function uploadKB() {
+    const file = document.getElementById("kbFile").files[0];
+    if (!file) { alert("请选文件"); return; }
+    const fd = new FormData();
+    fd.append("file", file);
+    document.getElementById("kbStatus").textContent = "上传中...";
+    const res = await fetch("/kb/upload", {method: "POST", body: fd});
+    const data = await res.json();
+    document.getElementById("kbStatus").textContent = `✅ 已入库 ${data.chunks_added} 段`;
 }
 
 function newChat() {
