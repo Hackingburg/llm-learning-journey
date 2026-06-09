@@ -37,7 +37,7 @@ def _headers() -> dict:
         "User-Agent": "PR-Reviewer/1.0",
     }
     if GITHUB_TOKEN:
-        headers["Authorization"] = f"token {GITHUB_TOKEN}"
+        headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
     return headers
 
 
@@ -49,7 +49,7 @@ def get_pr_info(owner: str, repo: str, pr_number: int) -> dict:
     data = response.json()
     return {
         "title": data["title"],
-        "body": data["body"] or "(无法描述)",
+        "body": data["body"] or "(无描述)",
         "author": data["user"]["login"],
         "state": data["state"],
         "additions": data["additions"],

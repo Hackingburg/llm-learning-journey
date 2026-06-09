@@ -113,7 +113,7 @@ def review_single_file(file_info: dict):
 
     # 边界 1: 没有 patch（二进制文件等）
     if not patch:
-        yield "（无 diff 内用，可能是二进制文件、重命名或文件太大）"    
+        yield "（无 diff 内容，可能是二进制文件、重命名或文件太大）"    
         return
     
     # 边界 2: diff 太长 -> 截断防止超 token

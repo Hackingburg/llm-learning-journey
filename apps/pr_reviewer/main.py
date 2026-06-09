@@ -86,7 +86,7 @@ async def review(req: ReviewRequest):
                 break 
             yield sse_event("summary_stream", {"content": chunk})
 
-        yield sse_event("summary_done", {})
+        yield sse_event("done", {})
     
     return StreamingResponse(stream(), media_type="text/event-stream")
 
