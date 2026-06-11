@@ -6,6 +6,7 @@ import os
 import json
 import requests
 from dotenv import load_dotenv
+from .retry import retry_on_failure
 
 load_dotenv()
 DEEPSEEK_KEY = os.getenv("DEEPSEEK_API_KEY")
@@ -72,11 +73,12 @@ SUMMARY_PROMPT = """你是高级工程师，已经审查完一个 PR 的所有�
 
 
 # ===== 流式调用 LLM =====
-def stream_llm(prompt: str, temperature: float = 0.3):
-    """流式调用 Deepseek，逐字返回"""
-    response = requests.post(
+@retry_on_failure(max_attempts=3, initial_delay=1.0)
+def _post_to_deepseek(prompt: str, temperature: float):
+    """🆕 仅负责发起 HTTP 请求，可重试"""
+    return requests.post(
         "https://api.deepseek.com/v1/chat/completions",
-        headers={ "Authorization": f"Bearer {DEEPSEEK_KEY}"},
+        headers={"Authorization": f"Bearer {DEEPSEEK_KEY}"},
         json={
             "model": "deepseek-chat",
             "messages": [{"role": "user", "content": prompt}],
@@ -86,6 +88,11 @@ def stream_llm(prompt: str, temperature: float = 0.3):
         stream=True,
         timeout=120,
     )
+
+
+def stream_llm(prompt: str, temperature: float = 0.3):
+    """流式调用 Deepseek，逐字返回"""
+    response = _post_to_deepseek(prompt, temperature)
     response.raise_for_status()
 
     for line in response.iter_lines():
