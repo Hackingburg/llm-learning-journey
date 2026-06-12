@@ -133,6 +133,57 @@ def get_rate_limit_status() -> dict:
         "reset_in_seconds": max(0, core["reset"] - int(__import__("time").time())),
     }
 
+def post_pr_comment(owner: str, repo: str, pr_number: int, body: str) -> dict:
+    """
+    在 PR 上发表评论
+    
+    ⚠️ 需要 token 有 public_repo 权限
+    ⚠️ PR 的 issue_comment 接口实际是用 /issues/{pr_number}/comments 因为 GitHub 把 PR 当成特殊的 Issue
+    
+    返回： 评论的完整信息（含 html_url）
+    """
+    if not GITHUB_TOKEN:
+        raise GitHubAPIError("发表评论需要配置 GITHUB_TOKEN")
+    
+    url = f"https://api.github.com/repos/{owner}/{repo}/issues/{pr_number}/comments"
+    response = requests.post(
+        url,
+        headers=_headers(),
+        json={"body": body},
+        timeout=30,
+        proxies={"http": None, "https": None},  # 🆕 显式禁用代理
+    )
+    _check_response(response)
+
+    data = response.json()
+    return {
+        "id": data["id"],
+        "html_url": data["html_url"],
+        "created_at": data["created_at"],
+    }
+
+
+def list_my_comments(owner: str, repo: str, pr_number: int) -> list[dict]:
+    """🆕 列出当前 token 用户在这个 PR 下发过的评论（用于幂等）"""
+    if not GITHUB_TOKEN:
+        return []
+    
+    # 先拿到当前 token 对应的用户名
+    me_resp = requests.get("https://api.github.com/user", headers=_headers(), timeout=10)
+    if not me_resp.ok:
+        return []
+    my_login = me_resp.json()["login"]
+    
+    # 拉这个 PR 的所有评论
+    url = f"https://api.github.com/repos/{owner}/{repo}/issues/{pr_number}/comments"
+    response = requests.get(url, headers=_headers(), timeout=30)
+    response.raise_for_status()
+    
+    return [ 
+        {"id": c["id"], "body": c["body"], "html_url": c["html_url"]}
+        for c in response.json()
+        if c["user"]["login"] == my_login
+    ]
 # ===== 测试 =====
 if __name__ == "__main__":
     # 先看看限额状态
@@ -154,3 +205,17 @@ if __name__ == "__main__":
         print(f"🔖 head_sha: {pr['head_sha'][:8]}...")  # 🆕 缓存用
     except GitHubAPIError as e:
         print(f"❌ {e}")
+
+    print("\n" + "="*60)
+    confirm = input("🧪 要测试发一条评论吗？(y/N): ")
+    if confirm.lower() == "y":
+        try:
+            result = post_pr_comment(
+                owner="Hackingburg",  # ⚠️ 改成你自己的仓库（测试用）
+                repo="llm-learning-journey",
+                pr_number=1,  # ⚠️ 改成你的某个 PR 号
+                body="🤖 这是 PR Reviewer 的测试评论，请忽略。",
+            )
+            print(f"✅ 评论已发布: {result['html_url']}")
+        except Exception as e:
+            print(f"❌ 失败: {e}")

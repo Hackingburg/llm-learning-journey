@@ -8,9 +8,10 @@ from functools import partial
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse, HTMLResponse
 from pydantic import BaseModel
-from .github_client import parse_pr_url, get_pr_info, get_pr_files, GitHubAPIError, RateLimitError
+from .github_client import parse_pr_url, get_pr_info, get_pr_files, GitHubAPIError, RateLimitError, post_pr_comment, list_my_comments
 from .reviewer import review_single_file, review_summary
 from .cache import make_cache_key, get_cached_review, save_review, list_cached_reviews
+from .formatter import format_review_as_comment
 
 
 app = FastAPI(title="PR Reviewer 🤖")
@@ -19,6 +20,12 @@ app = FastAPI(title="PR Reviewer 🤖")
 class ReviewRequest(BaseModel):
     pr_url: str
     force_refresh: bool = False
+
+
+class PostCommentRequest(BaseModel):
+    cache_key: str
+    overwrite: bool = False  # 是否覆盖已有评论
+
 
 
 def sse_event(event_type: str, data: dict) -> str:
@@ -156,6 +163,52 @@ def history_detail(cache_key: str):
         raise HTTPException(404, "审查记录不存在")
     return cached
 
+# ===================== API: 发评论 =====================
+@app.post("/post_comment")
+def post_comment(req: PostCommentRequest):
+    """🆕 把缓存的审查结果发到 GitHub PR 评论"""
+    cached = get_cached_review(req.cache_key)
+    if not cached:
+        raise HTTPException(404, "审查记录不存在")
+    
+    # 从 cache_key 反解出 owner/repo/pr_number
+    # 格式：owner/repo#pr_number@sha
+    try:
+        owner_repo, rest = req.cache_key.split("#")
+        owner, repo = owner_repo.split("/")
+        pr_number = int(rest.split("@")[0])
+    except Exception:
+        raise HTTPException(400, "cache_key 格式异常")
+    
+    # 🛡️ 防重复：先看是否已有 AI 评论
+    if not req.overwrite:
+        try:
+            my_comments = list_my_comments(owner, repo, pr_number)
+            for c in my_comments:
+                if "🤖 AI Code Review" in c["body"]:
+                    return {
+                        "skipped": True,
+                        "reason": "已经发过 AI Review，使用 overwrite=true 强制覆盖",
+                        "existing_url": c["html_url"],
+                    }
+        except Exception as e:
+            print(f"⚠️ 检查已有评论失败: {e}")
+    
+    # 格式化 + 发送
+    body = format_review_as_comment(
+        cached["pr_info"], cached["file_reviews"], cached["summary"]
+    )
+    
+    try:
+        result = post_pr_comment(owner, repo, pr_number, body)
+        return {
+            "success": True,
+            "comment_url": result["html_url"],
+            "comment_length": len(body),
+        }
+    except GitHubAPIError as e:
+        raise HTTPException(500, str(e))
+    
 
 # ===================== 前端 =====================
 @app.get("/", response_class=HTMLResponse)
@@ -331,6 +384,14 @@ function renderFullReview(data) {
             <div class="content">${escapeHtml(data.summary)}</div>
         </div>
     `;
+
+    html += `
+    <button onclick="postToGitHub('${currentCacheKey || data.cache_key || ''}')" 
+            style="margin-top:20px; background:#8957e5;">
+        📢 把这条 review 发到 GitHub PR 评论
+    </button>
+    <div id="postResult" style="margin-top:10px;"></div>
+`;
     
     output.innerHTML = html;
     window.scrollTo(0, 0);
@@ -442,6 +503,39 @@ function handle(type, obj) {
         d.style.borderLeftColor = "#3fb950";
         d.textContent = obj.from_cache ? "✅ 审查完成（来自缓存 ⚡）" : "✅ 审查完成（新鲜出炉 🔥）";
         output.appendChild(d);
+        
+        // 🆕 加按钮
+        const btn = document.createElement("button");
+        btn.textContent = "📢 把这条 review 发到 GitHub PR 评论";
+        btn.style.marginTop = "16px";
+        btn.style.background = "#8957e5";
+        btn.onclick = () => postToGitHub(obj.cache_key);
+        output.appendChild(btn);
+    }
+}
+
+async function postToGitHub(cacheKey, overwrite = false) {
+    if (!cacheKey) { alert("没有 cache_key"); return; }
+    if (!confirm(overwrite ? "确定覆盖已有 AI 评论？" : "确定要发评论到 GitHub PR 吗？")) return;
+    
+    try {
+        const res = await fetch("/post_comment", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({cache_key: cacheKey, overwrite}),
+        });
+        const data = await res.json();
+        
+        if (data.skipped) {
+            if (confirm(`${data.reason}\n\n要覆盖之前的评论吗？\n旧评论: ${data.existing_url}`)) {
+                return postToGitHub(cacheKey, true);
+            }
+        } else if (data.success) {
+            alert(`✅ 评论已发送！\n${data.comment_url}`);
+            window.open(data.comment_url, "_blank");
+        }
+    } catch (e) {
+        alert("❌ 失败: " + e.message);
     }
 }
 
