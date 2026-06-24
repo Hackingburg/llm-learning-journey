@@ -1,6 +1,6 @@
 """
-StudyBuddy - 智能出题 + 判分
-🎯 把知识点变成考题，再判断用户回答对不对
+StudyBuddy - 智能出题 + 判分（含关联式出题）
+🎯 生成普通题与关联式（融合）题，并对用户回答判分
 """
 import os
 import json
@@ -10,8 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 DEEPSEEK_KEY = os.getenv("DEEPSEEK_API_KEY")
 
-
-# ===== 出题 Prompt =====
+# ====== 基本 Prompt ======
 QUIZ_PROMPT = """你是学习陪伴助手。基于下面的知识点，出一道**简短的考题**。
 
 【知识点】
@@ -25,10 +24,7 @@ QUIZ_PROMPT = """你是学习陪伴助手。基于下面的知识点，出一道
 3. 答案应该是**一句话能说清**的（不要让用户写长篇）
 4. 不要直接抄知识点的原文，要换个说法考查
 
-只返回考题文字，不要任何前缀（如"题目："），不要带答案。"""
-
-
-# ===== 判分 Prompt =====
+只返回考题文字，不要任何前缀（如"题目："），不要带答案."""
 GRADE_PROMPT = """你是宽容但严谨的老师。判断学生回答是否正确。
 
 【考题】{question}
@@ -42,16 +38,35 @@ GRADE_PROMPT = """你是宽容但严谨的老师。判断学生回答是否正�
 - 不会、跳过、空白 → 算错
 
 请返回 JSON：
-{{
+{
   "correct": true/false,
   "feedback": "一句话点评（如果错了，告诉正确答案；如果对了，可以补充延伸知识）"
-}}
+}
 
-只返回 JSON。"""
+只返回 JSON.
+"""
 
+# ===== 新增：关联式出题 Prompt =====
+ASSOCIATED_QUIZ_PROMPT = """你是一个高级技术面试出题人。请基于以下**主知识点**和若干**相关知识点**，生成一道能考察“融会贯通/应用能力”的简短题目。
+
+【主知识点】
+主题: {topic}
+内容: {content}
+难度: {difficulty}
+
+【相关知识点】
+{related_texts}
+
+要求：
+1. 生成一道一至两句的题目（最多 40 字），能考察理解与应用，不要仅是定义复述。
+2. 题目应该明确可以用一句话作答（不要让人写长篇）。
+3. 若相关知识点可以组合成具体代码场景（例如把 session 注入到路由），请优先出这样的应用题。
+4. 返回 JSON：{ "question": "...", "rationale": "一句话说明为什么选这个题目" }
+5. 只返回 JSON，不要额外文字.
+"""
 
 def generate_quiz(point) -> str:
-    """🎲 给一个知识点出考题"""
+    """🎲 给单个知识点出题（原先实现）"""
     response = requests.post(
         "https://api.deepseek.com/v1/chat/completions",
         headers={"Authorization": f"Bearer {DEEPSEEK_KEY}"},
@@ -65,20 +80,56 @@ def generate_quiz(point) -> str:
                     difficulty=point.difficulty,
                 ),
             }],
-            "temperature": 0.7,  # 出题要多样化
+            "temperature": 0.7,
         },
         timeout=60,
     )
     response.raise_for_status()
     return response.json()["choices"][0]["message"]["content"].strip()
 
+def generate_associated_quiz(point, related_points: list[dict]) -> dict:
+    """
+    🎯 生成关联式题目
+    - point: KnowledgePoint ORM 对象（主知识点）
+    - related_points: list of dicts from vectorstore.find_similar_points, each has 'content','topic'
+    返回：{"question": "...", "rationale": "..."} 或 None（失败）
+    """
+    related_texts = "\n".join(
+        [f"- {r['topic']}: {r['content']}" for r in related_points[:5]]
+    ) if related_points else ""
+    prompt = ASSOCIATED_QUIZ_PROMPT.format(
+        topic=point.topic,
+        content=point.content,
+        difficulty=point.difficulty,
+        related_texts=related_texts or "(无相关知识点)",
+    )
+    try:
+        response = requests.post(
+            "https://api.deepseek.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {DEEPSEEK_KEY}"},
+            json={
+                "model": "deepseek-chat",
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.6,
+                "response_format": {"type": "json_object"},
+            },
+            timeout=60,
+        )
+        response.raise_for_status()
+        text = response.json()["choices"][0]["message"]["content"]
+        data = json.loads(text)
+        return {
+            "question": data.get("question", "").strip(),
+            "rationale": data.get("rationale", "").strip(),
+        }
+    except Exception as e:
+        print("⚠️ generate_associated_quiz 失败:", e)
+        return None
 
 def grade_answer(question: str, correct_point: str, user_answer: str) -> dict:
-    """✅ 判断用户回答对不对"""
-    # 用户输入为空 → 直接算错
+    """✅ 判断用户回答对不对（原有实现）"""
     if not user_answer.strip():
         return {"correct": False, "feedback": "你没有作答，正确答案是：" + correct_point}
-    
     response = requests.post(
         "https://api.deepseek.com/v1/chat/completions",
         headers={"Authorization": f"Bearer {DEEPSEEK_KEY}"},
@@ -92,13 +143,12 @@ def grade_answer(question: str, correct_point: str, user_answer: str) -> dict:
                     user_answer=user_answer,
                 ),
             }],
-            "temperature": 0.1,  # 判分要稳定
+            "temperature": 0.1,
             "response_format": {"type": "json_object"},
         },
         timeout=60,
     )
     response.raise_for_status()
-    
     text = response.json()["choices"][0]["message"]["content"]
     try:
         result = json.loads(text)
@@ -107,45 +157,4 @@ def grade_answer(question: str, correct_point: str, user_answer: str) -> dict:
             "feedback": result.get("feedback", "（无评语）"),
         }
     except json.JSONDecodeError:
-        # 兜底
-        return {"correct": False, "feedback": "判分失败，原文：" + text[:100]}
-
-
-# ===== 完整交互式测试 =====
-if __name__ == "__main__":
-    from .reviewer import get_due_knowledge_points, update_review_result
-    
-    due = get_due_knowledge_points(limit=3)
-    if not due:
-        print("🎉 没有要复习的知识点。先去 extractor.py 测试，存几条进来")
-        exit()
-    
-    print(f"📚 今天要复习 {len(due)} 个知识点\n")
-    
-    for idx, point in enumerate(due, 1):
-        print(f"\n{'='*60}")
-        print(f"题目 {idx}/{len(due)}  [{point.difficulty}]  主题: {point.topic}")
-        print('='*60)
-        
-        # 出题
-        question = generate_quiz(point)
-        print(f"\n🎲 {question}")
-        
-        # 用户回答
-        user_answer = input("\n你的回答（直接回车跳过）: ").strip()
-        
-        # 判分
-        result = grade_answer(question, point.content, user_answer)
-        
-        if result["correct"]:
-            print(f"\n✅ 答对了！{result['feedback']}")
-        else:
-            print(f"\n❌ 不太对。{result['feedback']}")
-        
-        # 更新数据库
-        updated = update_review_result(point.id, result["correct"])
-        next_date = updated.next_review_at.strftime("%Y-%m-%d")
-        print(f"\n📊 掌握度: {updated.mastery:.0%} | 下次复习: {next_date}")
-    
-    print(f"\n{'='*60}")
-    print("🎊 今天复习完成！")
+        return {"correct": False, "feedback": "判分失败，原文：" + text[:120]}

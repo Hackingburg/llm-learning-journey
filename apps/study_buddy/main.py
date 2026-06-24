@@ -1,37 +1,29 @@
 """
-StudyBuddy - Web 服务（最小版）
-🎯 暴露 4 个核心 API
+StudyBuddy - Web 服务（含 UI）
+🎯 暴露核心 API，并提供交互式 /ui 页面（集成画像/搜索/复习/提交）
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-
 from .extractor import extract_knowledge, save_knowledge_points
 from .reviewer import get_due_knowledge_points, update_review_result, get_stats
-from .quiz import generate_quiz, grade_answer
+from .quiz import generate_quiz, generate_associated_quiz, grade_answer
 from .profile import build_user_profile
+from .vectorstore import find_similar_points, sync_all_from_db
 from .models import SessionLocal, KnowledgePoint
-from .vectorstore import find_similar_points, sync_all_from_db 
-
 
 app = FastAPI(title="StudyBuddy 🧠")
 
-
-# ===================== 数据模型 =====================
 class ChatRequest(BaseModel):
     message: str
-
 
 class AnswerRequest(BaseModel):
     point_id: int
     question: str
     user_answer: str
 
-
-# ===================== API 1: 学习（提取知识点）=====================
 @app.post("/learn")
 def learn(req: ChatRequest):
-    """💡 用户发一句话 → 提取知识点 → 入库"""
     points = extract_knowledge(req.message)
     saved = save_knowledge_points(req.message, points)
     return {
@@ -42,31 +34,38 @@ def learn(req: ChatRequest):
         ],
     }
 
-
-# ===================== API 2: 获取今日复习 =====================
 @app.get("/due")
-def due():
-    """📅 今天该复习的知识点 + 自动出题"""
+def due(associated: bool = False):
     points = get_due_knowledge_points(limit=10)
-    
     quizzes = []
     for p in points:
+        if associated:
+            related = find_similar_points(f"{p.topic}: {p.content}", top_k=5, exclude_ids=[p.id])
+            assoc = generate_associated_quiz(p, related)
+            if assoc and assoc.get("question"):
+                quizzes.append({
+                    "point_id": p.id,
+                    "topic": p.topic,
+                    "difficulty": p.difficulty,
+                    "question": assoc["question"],
+                    "rationale": assoc.get("rationale"),
+                    "_correct_point": p.content,
+                    "related": related,
+                })
+                continue
+        q = generate_quiz(p)
         quizzes.append({
             "point_id": p.id,
             "topic": p.topic,
             "difficulty": p.difficulty,
-            "question": generate_quiz(p),
-            "_correct_point": p.content,  # 🔒 前端用不到，但要传给判分
+            "question": q,
+            "_correct_point": p.content,
+            "related": [],
         })
-    
     return {"total": len(quizzes), "quizzes": quizzes}
 
-
-# ===================== API 3: 提交回答 =====================
 @app.post("/answer")
 def answer(req: AnswerRequest):
-    """✅ 用户答题 → AI 判分 → 更新数据库"""
-    # 取回原知识点
     db = SessionLocal()
     try:
         point = db.query(KnowledgePoint).get(req.point_id)
@@ -75,13 +74,9 @@ def answer(req: AnswerRequest):
         correct_point = point.content
     finally:
         db.close()
-    
-    # 判分
+
     result = grade_answer(req.question, correct_point, req.user_answer)
-    
-    # 更新数据库
     updated = update_review_result(req.point_id, result["correct"])
-    
     return {
         "correct": result["correct"],
         "feedback": result["feedback"],
@@ -89,53 +84,172 @@ def answer(req: AnswerRequest):
         "next_review_at": updated.next_review_at.isoformat(),
     }
 
-
-# ===================== API 4: 学习画像 =====================
 @app.get("/profile")
 def profile():
-    """🧠 用户的学习画像"""
     return build_user_profile()
 
-
-# ===================== API 5: 简单统计 =====================
 @app.get("/stats")
 def stats():
-    """📊 快速统计"""
     return get_stats()
 
+@app.get("/search")
+def search(q: str, top_k: int = 5):
+    results = find_similar_points(q, top_k=top_k)
+    return {"query": q, "results": results}
 
-# ===================== API 6: 向量库同步 =====================
 @app.post("/sync_vectors")
 def sync_vectors():
     return sync_all_from_db()
 
+@app.get("/ui", response_class=HTMLResponse)
+def ui():
+    return FRONTEND_UI
 
-# ===================== API 7: 相似知识点搜索 =====================
-@app.get("/search")
-def search(q: str, top_k: int = 5):
-    """🔍 语义搜索知识点
-    
-    例: /search?q=依赖注入
-    """
-    results = find_similar_points(q, top_k=top_k)
-    return {"query": q, "results": results}
+# Frontend UI (single-page)
+FRONTEND_UI = """
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>StudyBuddy UI 🧠</title>
+<style>
+body { font-family: -apple-system, Roboto, "PingFang SC", sans-serif; margin:0; height:100vh; display:flex; background:#0f1724; color:#e6eef8;}
+.sidebar { width:300px; padding:16px; background:#071025; border-right:1px solid #122033; overflow:auto; }
+.main { flex:1; padding:20px; overflow:auto; }
+.h { color:#7dd3fc; font-weight:700; margin-bottom:10px;}
+.card { background:#071427; border:1px solid #123041; padding:12px; border-radius:8px; margin-bottom:12px;}
+button { background:#06b6d4; border:none; color:#022; padding:8px 12px; border-radius:6px; cursor:pointer; }
+input, textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #1f3b4a; background:#02131b; color:#e6eef8;}
+.small { font-size:13px; color:#98a8b8; }
+.kp { margin-bottom:8px; padding:8px; border-radius:6px; background:#021520; border:1px solid #123c45; }
+</style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="h">🧠 StudyBuddy</div>
+    <div class="card">
+      <div style="display:flex; gap:8px;">
+        <input id="learnInput" placeholder="写一句：今天学了 X" />
+        <button onclick="learn()">学</button>
+      </div>
+      <div style="margin-top:8px;" class="small">把一句学习话发送给系统，它会提取知识点并入库。</div>
+    </div>
 
+    <div class="card">
+      <div class="h">📊 学习画像</div>
+      <pre id="profile" style="white-space:pre-wrap; font-size:13px;"></pre>
+      <button onclick="loadProfile()">刷新画像</button>
+    </div>
 
-# ===================== 简易首页（明天会改成完整 UI）=====================
-@app.get("/", response_class=HTMLResponse)
-def index():
-    return """
-    <html>
-    <head><title>StudyBuddy 🧠</title></head>
-    <body style="font-family: sans-serif; max-width: 800px; margin: 50px auto;">
-        <h1>🧠 StudyBuddy API</h1>
-        <p>明天会有完整的 Web UI。现在你可以测试这些 API：</p>
-        <ul>
-            <li><a href="/profile">/profile</a> - 你的学习画像</li>
-            <li><a href="/stats">/stats</a> - 快速统计</li>
-            <li><a href="/due">/due</a> - 今日待复习（注意：会调 LLM 出题，等几秒）</li>
-            <li><a href="/docs">/docs</a> - 完整 API 文档</li>
-        </ul>
-    </body>
-    </html>
-    """
+    <div class="card">
+      <div class="h">🔎 语义检索</div>
+      <input id="q" placeholder="搜索相关知识点（语义搜索）" />
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button onclick="search()">搜</button>
+        <button onclick="syncVectors()">同步向量</button>
+      </div>
+      <div id="searchRes" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="h">📅 本地测试工具</div>
+      <div class="small">注意：/due 会调用 LLM 出题，可能要几秒</div>
+      <label style="display:block; margin-top:8px;">
+        <input id="assocToggle" type="checkbox" /> 关联式出题（尝试把相似知识点合并出题）
+      </label>
+      <button onclick="loadDue()">抓取今日复习</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="content">
+      <h2 style="color:#7dd3fc">今日复习 / 出题</h2>
+      <div id="dueArea"></div>
+    </div>
+  </div>
+
+<script>
+async function safeJson(res) {
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`HTTP ${res.status}: ${text.slice(0,200)}`);
+  }
+  return res.json();
+}
+
+async function loadProfile(){
+  const res = await fetch('/profile');
+  const data = await safeJson(res);
+  document.getElementById('profile').textContent = JSON.stringify(data, null, 2);
+}
+
+async function learn(){
+  const v = document.getElementById('learnInput').value.trim();
+  if (!v) return alert('输入一句学习内容');
+  const res = await fetch('/learn', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({message:v})});
+  const j = await safeJson(res);
+  alert('提取到: ' + j.extracted_count + ' 条');
+  document.getElementById('learnInput').value='';
+  loadProfile();
+}
+
+async function syncVectors(){
+  const res = await fetch('/sync_vectors', {method:'POST'});
+  const j = await safeJson(res);
+  alert('同步结果: ' + JSON.stringify(j));
+}
+
+async function search(){
+  const q = document.getElementById('q').value.trim();
+  if (!q) return alert('输入关键词');
+  const res = await fetch(`/search?q=${encodeURIComponent(q)}`);
+  const j = await safeJson(res);
+  const el = document.getElementById('searchRes');
+  if (!j.results.length) el.innerHTML = '<div class="small">未找到相关知识点</div>';
+  else {
+    el.innerHTML = j.results.map(r=>`<div class="kp"><b>${r.topic}</b><div class="small">${r.content}</div><div class="small">相似度:${(r.similarity||0).toFixed(2)}</div></div>`).join('');
+  }
+}
+
+async function loadDue(){
+  const assoc = document.getElementById('assocToggle').checked;
+  const res = await fetch('/due' + (assoc ? '?associated=true' : ''));
+  const j = await safeJson(res);
+  const area = document.getElementById('dueArea');
+  area.innerHTML = '';
+  if (!j.quizzes.length) {
+    area.innerHTML = '<div class="small">今天没有到复习时间的知识点</div>';
+    return;
+  }
+  j.quizzes.forEach(q => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    let relatedHtml = '';
+    if (q.related && q.related.length) {
+       relatedHtml = '<div class="small" style="margin-top:8px;"><b>相关知识点：</b>' +
+         q.related.map(r => `<div>${r.topic}: ${r.content}</div>`).join('') + '</div>';
+    }
+    let rationaleHtml = q.rationale ? `<div class="small" style="margin-top:6px;"><b>出题理由：</b>${q.rationale}</div>` : '';
+    div.innerHTML = `<div><b>${q.topic}</b> <span class="small">[${q.difficulty}]</span></div>
+                     <div style="margin-top:8px;">${q.question}</div>
+                     ${relatedHtml}
+                     ${rationaleHtml}
+                     <div style="margin-top:8px;"><input id="ans_${q.point_id}" placeholder="你的回答"/></div>
+                     <div style="margin-top:8px;"><button onclick="submitAnswer(${q.point_id}, ${JSON.stringify(q.question).replace(/'/g, \"\\\\'\")})">提交回答</button></div>
+                     <div id="fb_${q.point_id}" style="margin-top:8px;"></div>`;
+    area.appendChild(div);
+  });
+}
+
+async function submitAnswer(point_id, question){
+  const val = document.getElementById('ans_'+point_id).value || '';
+  const res = await fetch('/answer', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({point_id, question, user_answer: val})});
+  const j = await safeJson(res);
+  document.getElementById('fb_'+point_id).innerHTML = `<div class="small">${j.correct ? '✅ 正确' : '❌ 不正确'} — ${j.feedback} <br/> 新掌握度: ${(j.new_mastery*100).toFixed(0)}% 下次复习:${j.next_review_at}</div>`;
+  loadProfile();
+}
+window.onload = loadProfile;
+</script>
+</body>
+</html>
+"""
