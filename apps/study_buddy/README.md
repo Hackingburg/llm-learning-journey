@@ -19,7 +19,7 @@
 
 ## 📸 截图
 
-![dashboard](docs/screenshot_ui.png)
+![dashboard](https://github.com/Hackingburg/llm-learning-journey/raw/main/docs/screenshot_ui.png)
 
 > 主界面：左侧学习画像 + 语义搜索 + 同步向量；右侧今日复习题（支持关联式出题）
 
