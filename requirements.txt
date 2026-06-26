@@ -1,11 +1,21 @@
-requests>=2.31.0
-httpx>=0.27.0
-pydantic>=2.5.0
-python-dotenv>=1.0.0
+# ===== Web 框架 =====
 fastapi>=0.110.0
 uvicorn[standard]>=0.27.0
+pydantic>=2.5.0
+python-multipart>=0.0.9    # FastAPI 文件上传（给以后的 ResumeAI 留的）
+
+# ===== 数据库 ORM =====
 sqlalchemy>=2.0.0
-numpy>=1.26.0
+
+# ===== LLM 调用 + HTTP =====
+requests>=2.31.0
+httpx>=0.27.0
+python-dotenv>=1.0.0
+
+# ===== 向量库 + Embedding =====
 chromadb>=0.5.0
+sentence-transformers>=2.3.0  
+numpy>=1.26.0                  # sentence-transformers 依赖，写出来更清晰
+
+# ===== 异步支持 =====
 anyio>=4.0.0
-python-multipart>=0.0.9
