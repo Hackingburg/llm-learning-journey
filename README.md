@@ -1,109 +1,117 @@
-# 🚀 LLM Learning Journey
+# 👋 Hi, I'm Hackingburg
 
-> 一个 Python 入门者向大模型应用工程师转型的真实记录
+> **产品型工程师 (Product Engineer) · 持续学习者 · 长期主义者**
 
-## 🌐 在线 Demo
+8 年跨行业经历（图书 / 机械 / 互联网）。  
+**2025 起专注 AI 应用开发**，相信真正的工程师不只会写代码 —— 还要懂用户、懂业务、懂世界怎么运转。
 
-**DeepChat API 已部署上线**：https://deepchat-nh50.onrender.com/docs
+📧 **联系**：haking@outlook.com  
+🌱 **当前状态**：开放 AI 应用 / 产品工程师方向的工作机会与合作
 
-直接在浏览器里就可以体验 AI 对话、查看 OpenAPI 文档。
+---
 
-## ⭐ 主要作品
+## 🚀 我在做什么
 
-### DeepChat - 命令行 AI 助手
-独立开发的产品级 ChatBot，整合 LLM 应用核心能力：
-- 💬 流式输出（打字机效果）
-- 🧠 多轮对话记忆
-- 📏 滑动窗口管理（防止上下文超限）
-- 💰 实时 Token 与成本追踪
-- 💾 SQLite 持久化（重启不丢数据）
-- 🌐 FastAPI Web 服务 + Docker 容器化
-- ☁️ 已部署到 Render 云端
+这个仓库 (`llm-learning-journey`) 是我**从 0 到 LLM 应用工程师**的完整记录。  
+不是教程笔记，是**真实能跑、能用、能解决问题的产品**。
 
-➡️ [核心代码](./day08_deepchat_db.py)
+---
 
-## 📖 关于这个仓库
+## 📦 项目作品集
 
-这里记录我从 0 开始学习大模型应用开发的全过程，包括代码、笔记、踩过的坑和做过的项目。
+### 🧠 [StudyBuddy — AI 学习陪伴 Agent](apps/study_buddy/)
 
-## 🎯 学习目标
+> 主动追着你复习的 AI。提取知识点 → 艾宾浩斯调度 → 智能出题 → 向量检索做"关联式融合题"。
 
-- ✅ 掌握 LLM API 调用与 Prompt 工程
-- 🔄 构建 RAG 知识库问答系统
-- 🔄 开发 AI Agent 智能体
-- 🔄 学习模型微调（LoRA）
-- 🔄 成为一名 LLM 应用工程师
+**技术栈**：FastAPI · SQLAlchemy · ChromaDB · sentence-transformers · DeepSeek LLM  
+**亮点**：RAG · Prompt 工程 · 后台异步向量化 · 艾宾浩斯算法
 
-## 📅 学习进度
+[📖 查看项目详情 →](apps/study_buddy/)
 
-| Day | 日期 | 内容 | 状态 |
-|-----|------|------|------|
-| 01 | 2026-05-04 | 第一次调用 DeepSeek API | ✅ |
-| 02 | 2026-05-05 | Pydantic + 多轮对话 ChatBot | ✅ |
-| 03 | 2026-05-06 | 流式输出 + Token统计 | ✅ |
-| 04 | 2026-05-07 | DeepChat 产品级 ChatBot 🎁 | ✅ |
-| 05 | 2026-05-11 | 学习 Prompt 工程四大基本法 | ✅ |
-| 06 | 2026-05-12 | 让 AI 输出严格符合业务规范的 JSON | ✅ |
-| 07 | 2026-05-13 | 用 FastAPI 把 Deepchat Web 服务化 | ✅ |
-| 08 | 2026-05-14 | Deepchat 持久化 | ✅ |
-| 09 | 2026-05-18 | 将 Deepchat 上线到 Render | ✅ |
+---
 
+### 🤖 [PR Reviewer — GitHub PR 智能审查工具](apps/pr_reviewer/)
+
+> 贴一个 PR 链接进来，AI 像资深 reviewer 一样**流式输出**审查意见，并能一键发到 PR 评论区。
+
+**技术栈**：FastAPI · SSE · GitHub REST API · DeepSeek LLM  
+**亮点**：SSE 流式输出 · 基于 commit SHA 的缓存 · 指数退避重试 · GitHub API 闭环
+
+[📖 查看项目详情 →](apps/pr_reviewer/)
+
+---
+
+### 📄 [ResumeAI — 简历优化助手](apps/resume_ai/)
+
+> 上传简历 → AI 像挑剔但温柔的招聘经理一样，分维度挑刺并给出可复制的改写示例。
+
+**技术栈**：FastAPI · LLM Prompt 工程 · 多维度评估框架  
+**亮点**：双输入（上传 + 粘贴）· 结构 / 内容 / 表达 三维度评分 · 自带 sample 体验
+
+[📖 查看项目详情 →](apps/resume_ai/)
+
+---
+
+### 📱 BookGuard — 图书正版鉴别小程序（线下产品）
+
+> 帮普通读者**快速识别一本书是否为正版**的工具，源自我 6 年图书行业一线观察。
+
+**角色**：产品负责人 & 持续迭代开发者（初版团队协作，后续改造与升级独立完成）  
+**状态**：线上运行中，持续迭代  
+**意义**：6 年图书行业经验在 AI 时代的"延伸答卷"。我相信好产品来自**真实问题 + 长期打磨**。
+
+> 💡 这是我**为什么走上 AI 工程师道路**的原点 —— 我想用更强的技术，把这件已经做了 6 年的事做得更好。
+
+---
 
 ## 🛠️ 技术栈
 
-- **语言**: Python 3.12
-- **LLM**: DeepSeek
-- **核心库**: requests, httpx, pydantic, python-dotenv
+**LLM 应用层**　　DeepSeek · OpenAI 兼容 API · Prompt 工程 · JSON Mode · Streaming  
+**Web 框架**　　 FastAPI · Uvicorn · Pydantic  
+**数据持久化**　 SQLAlchemy · SQLite  
+**向量 / RAG**　ChromaDB · sentence-transformers (multilingual)  
+**前端**　　　　 单文件 HTML · Fetch / EventSource (SSE)  
+**工程能力**　　 模块化设计 · 异步与并发 · 错误处理与重试 · 缓存策略  
+**版本控制**　　 Git · GitHub Actions（学习中）
 
-## 📂 项目结构
+---
 
-```
-llm-learning-journey/
-├── day01_first_call.py         # Day 1: 第一次 API 调用
-├── day02_pydantic_basics.py    # Day 2: Pydantic 基础
-├── day02_chat_with_memory.py   # Day 2: 带记忆的 ChatBot
-├── day03_streaming.py          # Day 3: 流式输出
-├── day03_token_count.py        # Day 3: Token 成本计算
-├── day04_deepchat.py           # Day 4: 产品级 ChatBot ”Deepchat“
-├── day05_prompt_egineering.py  # Day 5: Prompt 工程四大基本法
-├── day05_my_experiment.py      # Day 5: 角色扮演小实验
-├── day06_json_basic.py         # Day 6: 靠 prompt 让 AI 输出 JSON 格式的文本
-├── day06_json_mode.py          # Day 6: 强制让 AI 只输出 JSON 格式
-├── day06_pydantic_extract.py   # Day 6: 工业级结构化输出
-├── day07_ai_api.py             # Day 7: 把 AI 能力变成 Web API
-├── day07_deepchat_api.py       # Day 7: DeepChat Web 服务化
-├── day07_fastapi_hello.py      # Day 7: FastAPI 入门
-├── day08_deepchat_db.py        # Day 8: DeepChat 持久化版
-├── day08_sqlalchemy_basics.py  # Day 8: SQLAlchemy 入门
-├── day08_sqlite_basics.py      # Day 8: sqlite 入门
-├── Dockerfile                  # Day 9: 镜像
-├── .dockerignore               # Day 9: 镜像忽略文件
-├── .env.example
-├── .gitignore
-├── requirements.txt
-├── LEARNING_LOG.md
-└── README.md
-```
+## 🎯 我在寻找
 
-## 🔧 快速开始
+我目前正在认真寻找以下方向的合作机会：
 
-```bash
-# 1. 克隆仓库
-git clone https://github.com/Hackingburg/llm-learning-journey.git
-cd llm-learning-journey
+- 💼 **全职机会**：AI 应用工程师 / 产品型工程师 / LLM 应用开发  
+- 🤝 **远程 / 兼职**：AI 产品原型开发 · 个人/小团队的 AI 集成需求  
+- 🌱 **共同创造**：如果你有一个产品想法但缺工程实现，欢迎聊聊
 
-# 2. 创建虚拟环境
-python3 -m venv venv
-source venv/bin/activate  # Mac/Linux
-# venv\Scripts\activate   # Windows
+**我能带来的**：
 
-# 3. 安装依赖
-pip install -r requirements.txt
+- 8 年跨行业（图书 / 机械 / 互联网）的真实业务理解
+- 端到端的 AI 应用开发能力（从需求 → 设计 → 实现 → 上线）
+- 一种罕见的"慢工出细活"的工程师气质 —— 我相信复利，不追风口
 
-# 4. 配置 API Key
-cp .env.example .env
-# 编辑 .env 填入你的 DEEPSEEK_API_KEY
+📧 **聊聊**：haking@outlook.com
 
-# 5. 运行
-python day01_first_call.py
-```
+---
+
+## 🌱 关于我
+
+> 8 年里我换过 3 个行业，每一次都不是因为"风口"，而是因为想**真正搞清楚一件事**。  
+>
+> 图书行业的 6 年让我懂了"产品是为真实的人服务的"。  
+> 机械行业让我看见"图纸上的一条线，是怎么变成车间里的一个零件"。  
+> 而 AI 让我终于找到了能把前面所有积累**串起来**的工具。
+>
+> 我没有最聪明的头脑，但我有一份难得的耐心和自己的节奏。  
+> 我相信代码、产品、和长期付出 —— **总会被看见**。
+
+---
+
+## 📜 License
+
+本仓库中所有代码采用 [MIT License](LICENSE) 开源。  
+欢迎学习、改造、二次开发，如果对你有帮助，给个 ⭐ 就是最大的鼓励。
+
+---
+
+> 🚗 *写代码不只是为了写代码。是为了有一天，能开着一辆舒服的车，带着想带的人，去想去的地方。*
