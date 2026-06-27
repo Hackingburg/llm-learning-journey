@@ -54,7 +54,7 @@ async def analyze(
     return StreamingResponse(stream(), media_type="text/event-stream")
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/ui", response_class=HTMLResponse)
 def index():
     return FRONTEND_HTML
 

@@ -211,7 +211,7 @@ def post_comment(req: PostCommentRequest):
     
 
 # ===================== 前端 =====================
-@app.get("/", response_class=HTMLResponse)
+@app.get("/ui", response_class=HTMLResponse)
 def index():
     return FRONTEND_HTML
 
